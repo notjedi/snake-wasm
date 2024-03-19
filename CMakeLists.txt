@@ -9,21 +9,31 @@ set(SOURCES
 #     include/my_header.h
 # )
 
-include_directories(include)
-
-# Optionally, you can link libraries if needed
-# target_link_libraries(my_project my_library)
-
-add_library(raylib STATIC IMPORTED)
-set_target_properties(raylib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/raylib/libraylib.a)
-
+set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2")
 
-add_executable(snake_wasm ${SOURCES} ${HEADERS})
-target_link_libraries(snake_wasm raylib)
-target_link_libraries(snake_wasm m)
+if (PLATFORM_WEB)
+    add_compile_definitions(PLATFORM_WEB)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
 
-# Optionally, configure installation
-# install(TARGETS my_project DESTINATION bin)
-# install(FILES ${HEADERS} DESTINATION include)
+    include_directories(include/wasm)
+    add_library(raylib STATIC IMPORTED)
+    set_target_properties(raylib PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/lib/wasm/raylib/libraylib.a)
+
+    add_executable(snake_wasm ${SOURCES} ${HEADERS})
+    target_link_libraries(snake_wasm raylib)
+    target_link_libraries(snake_wasm m)
+else()
+    include_directories(include/x86)
+    link_directories(lib/x86)
+    link_libraries(raylib)
+
+    add_executable(snake_wasm ${SOURCES} ${HEADERS})
+    target_link_libraries(snake_wasm m)
+
+    # Optionally, configure installation
+    # install(TARGETS my_project DESTINATION bin)
+    # install(FILES ${HEADERS} DESTINATION include)
+endif()
