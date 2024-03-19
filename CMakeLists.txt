@@ -27,6 +27,10 @@ if (PLATFORM_WEB)
     add_executable(snake_wasm ${SOURCES} ${HEADERS})
     target_link_libraries(snake_wasm raylib)
     target_link_libraries(snake_wasm m)
+
+    # https://github.com/clangd/clangd/issues/1621#issuecomment-1703330511
+    execute_process(COMMAND em++ --cflags OUTPUT_VARIABLE EM_CFLAGS)
+    set_target_properties(snake_wasm PROPERTIES COMPILE_FLAGS "${EM_CFLAGS}")
 else()
     include_directories(include/x86)
     link_directories(lib/x86)
