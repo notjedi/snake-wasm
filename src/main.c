@@ -3,7 +3,7 @@
 
 #include "raylib/raylib.h"
 
-#if defined(PLATFORM_WEB)
+#ifdef PLATFORM_WEB
 #include "emscripten/emscripten.h"
 #endif /* ifdef PLATFORM_WEB */
 
@@ -21,7 +21,6 @@ int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake babu");
 
 #ifdef PLATFORM_WEB
-  // #if defined(PLATFORM_WEB)
   printf("Hi, you selected PLATFORM_WEB\n");
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
