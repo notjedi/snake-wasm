@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <unistd.h>
 
 #include "raylib/raylib.h"
@@ -10,14 +11,20 @@
 #define GRID_H 20.0f
 #define SLEEP_DURATION 62500
 
+#define RAND_RANGE(max) (rand() % max)
+
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
+const int NUM_GRIDS_X = SCREEN_WIDTH / GRID_W;
+const int NUM_GRIDS_Y = SCREEN_HEIGHT / GRID_H;
 
 enum Direction { Up, Right, Down, Left };
 
-static Rectangle snake_head = {0.0f, 0.0f, GRID_W, GRID_H};
+static Vector2 snake_head = {0, 0};
+static Vector2 food_pos = {NUM_GRIDS_X / 2, NUM_GRIDS_Y / 2};
 static enum Direction current_dir = Right;
 
+Vector2 GetRandomVector();
 void UpdateDrawFrame();
 
 int main() {
@@ -38,6 +45,10 @@ int main() {
   return 0;
 }
 
+Vector2 GetRandomVector() {
+  return (Vector2){.x = rand() % NUM_GRIDS_X, .y = rand() % NUM_GRIDS_Y};
+}
+
 void UpdateDrawFrame() {
   // Update;
   if (IsKeyDown(KEY_RIGHT)) {
@@ -50,24 +61,29 @@ void UpdateDrawFrame() {
     current_dir = Down;
   }
 
-  if (snake_head.x >= SCREEN_WIDTH)
+  if (snake_head.x >= NUM_GRIDS_X)
     snake_head.x = 0;
   else if (snake_head.x < 0)
-    snake_head.x = SCREEN_WIDTH - GRID_W;
+    snake_head.x = NUM_GRIDS_X;
 
-  if (snake_head.y >= SCREEN_HEIGHT)
+  if (snake_head.y >= NUM_GRIDS_Y)
     snake_head.y = 0;
   else if (snake_head.y < 0)
-    snake_head.y = SCREEN_HEIGHT - GRID_H;
+    snake_head.y = NUM_GRIDS_Y;
 
   if (current_dir == Right) {
-    snake_head.x += GRID_W;
+    snake_head.x++;
   } else if (current_dir == Left) {
-    snake_head.x -= GRID_W;
+    snake_head.x--;
   } else if (current_dir == Up) {
-    snake_head.y -= GRID_H;
+    snake_head.y--;
   } else if (current_dir == Down) {
-    snake_head.y += GRID_H;
+    snake_head.y++;
+  }
+
+  if (snake_head.x == food_pos.x && snake_head.y == food_pos.y) {
+    // TODO: grow the snake, update the point
+    food_pos = GetRandomVector();
   }
 
   // Draw;
@@ -84,7 +100,10 @@ void UpdateDrawFrame() {
       }
     }
 
-    DrawRectangleRec(snake_head, RED);
+    DrawRectangle(snake_head.x * GRID_W, snake_head.y * GRID_H, GRID_W, GRID_H,
+                  RED);
+    DrawCircle((food_pos.x * GRID_W) + (GRID_W / 2.0f),
+               (food_pos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
   } // EndDrawing
 
   EndDrawing();
