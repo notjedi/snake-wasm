@@ -1,5 +1,4 @@
-#include <stddef.h>
-#include <stdio.h>
+#include <unistd.h>
 
 #include "raylib/raylib.h"
 
@@ -7,16 +6,17 @@
 #include "emscripten/emscripten.h"
 #endif /* ifdef PLATFORM_WEB */
 
-#define MSG_STR "Hi, I'm going to build a snake game with raylib and wasm"
 #define GRID_W 20.0f
 #define GRID_H 20.0f
+#define SLEEP_DURATION 62500
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
-const char *MSG = MSG_STR;
-const size_t MSG_LEN = sizeof(MSG_STR) - 1;
+
+enum Direction { Up, Right, Down, Left };
 
 static Rectangle snake_head = {0.0f, 0.0f, GRID_W, GRID_H};
+static enum Direction current_dir = Right;
 
 void UpdateDrawFrame();
 
@@ -26,13 +26,13 @@ int main() {
 
 #ifdef PLATFORM_WEB
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
-#else
+#else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
 
   while (!WindowShouldClose()) {
     UpdateDrawFrame();
   }
-#endif /* ifdef PLATFORM_WEB */
+#endif
 
   CloseWindow();
   return 0;
@@ -41,24 +41,34 @@ int main() {
 void UpdateDrawFrame() {
   // Update;
   if (IsKeyDown(KEY_RIGHT)) {
-    snake_head.x += GRID_W;
+    current_dir = Right;
   } else if (IsKeyDown(KEY_LEFT)) {
-    snake_head.x -= GRID_W;
+    current_dir = Left;
   } else if (IsKeyDown(KEY_UP)) {
-    snake_head.y -= GRID_H;
+    current_dir = Up;
   } else if (IsKeyDown(KEY_DOWN)) {
-    snake_head.y += GRID_H;
+    current_dir = Down;
   }
 
-  if (snake_head.x > SCREEN_WIDTH)
+  if (snake_head.x >= SCREEN_WIDTH)
     snake_head.x = 0;
   else if (snake_head.x < 0)
-    snake_head.x = SCREEN_WIDTH;
+    snake_head.x = SCREEN_WIDTH - GRID_W;
 
-  if (snake_head.y > SCREEN_HEIGHT)
+  if (snake_head.y >= SCREEN_HEIGHT)
     snake_head.y = 0;
   else if (snake_head.y < 0)
-    snake_head.y = SCREEN_HEIGHT;
+    snake_head.y = SCREEN_HEIGHT - GRID_H;
+
+  if (current_dir == Right) {
+    snake_head.x += GRID_W;
+  } else if (current_dir == Left) {
+    snake_head.x -= GRID_W;
+  } else if (current_dir == Up) {
+    snake_head.y -= GRID_H;
+  } else if (current_dir == Down) {
+    snake_head.y += GRID_H;
+  }
 
   // Draw;
   BeginDrawing();
@@ -78,4 +88,5 @@ void UpdateDrawFrame() {
   } // EndDrawing
 
   EndDrawing();
+  usleep(SLEEP_DURATION);
 }
