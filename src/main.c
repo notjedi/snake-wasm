@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -6,6 +7,8 @@
 #ifdef PLATFORM_WEB
 #include "emscripten/emscripten.h"
 #endif /* ifdef PLATFORM_WEB */
+
+#include "snake.h"
 
 #define GRID_W 20.0f
 #define GRID_H 20.0f
@@ -18,11 +21,15 @@ const int SCREEN_HEIGHT = 400;
 const int NUM_GRIDS_X = SCREEN_WIDTH / GRID_W;
 const int NUM_GRIDS_Y = SCREEN_HEIGHT / GRID_H;
 
-enum Direction { Up, Right, Down, Left };
+static int score = 0;
+static Direction dir = Right;
+static Snake snake = (Snake){.x = 0, .y = 0, .width = GRID_W, .height = GRID_H};
+static Vector2 foodPos = {NUM_GRIDS_X / 2, NUM_GRIDS_Y / 2};
 
-static Vector2 snake_head = {0, 0};
-static Vector2 food_pos = {NUM_GRIDS_X / 2, NUM_GRIDS_Y / 2};
-static enum Direction current_dir = Right;
+static Rectangle foodSourceRec;
+static Rectangle foodDestRec;
+static Vector2 origin;
+static Texture2D scarfy;
 
 Vector2 GetRandomVector();
 void UpdateDrawFrame();
@@ -30,9 +37,25 @@ void UpdateDrawFrame();
 int main() {
 
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake babu");
+  scarfy = LoadTexture("resources/scarfy.png");
+
+  int foodWidth = scarfy.width / 6;
+  int foodHeight = scarfy.height;
+  origin = (Vector2){(float)foodWidth, (float)foodHeight};
+  foodSourceRec = (Rectangle){0.0f, 0.0f, (float)foodWidth, (float)foodHeight};
+  foodDestRec =
+      (Rectangle){foodPos.x * GRID_W, foodPos.y * GRID_H, GRID_W, GRID_H};
+
+  printf("scarfy:= w: %d, h: %d, id: %u\n", scarfy.width, scarfy.height,
+         scarfy.id);
+  printf("foodWidth: %d, foodHeight: %d\n", foodWidth, foodHeight);
+  printf("source:= x: %f, y: %f, w: %f, h: %f\n", foodSourceRec.x,
+         foodSourceRec.y, foodSourceRec.width, foodSourceRec.height);
 
 #ifdef PLATFORM_WEB
-  emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
+  // TODO: try passing args to UpdateDrawFrame using
+  // emscripten_set_main_loop_arg
+  emscripten_set_main_loop(UpdateDrawFrame, 20, 1);
 #else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
 
@@ -52,38 +75,36 @@ Vector2 GetRandomVector() {
 void UpdateDrawFrame() {
   // Update;
   if (IsKeyDown(KEY_RIGHT)) {
-    current_dir = Right;
+    dir = Right;
   } else if (IsKeyDown(KEY_LEFT)) {
-    current_dir = Left;
+    dir = Left;
   } else if (IsKeyDown(KEY_UP)) {
-    current_dir = Up;
+    dir = Up;
   } else if (IsKeyDown(KEY_DOWN)) {
-    current_dir = Down;
+    dir = Down;
   }
 
-  if (snake_head.x >= NUM_GRIDS_X)
-    snake_head.x = 0;
-  else if (snake_head.x < 0)
-    snake_head.x = NUM_GRIDS_X;
+  updateSnake(&snake, dir);
 
-  if (snake_head.y >= NUM_GRIDS_Y)
-    snake_head.y = 0;
-  else if (snake_head.y < 0)
-    snake_head.y = NUM_GRIDS_Y;
+  if (snake.x >= NUM_GRIDS_X)
+    snake.x = 0;
+  else if (snake.x < 0)
+    snake.x = NUM_GRIDS_X;
 
-  if (current_dir == Right) {
-    snake_head.x++;
-  } else if (current_dir == Left) {
-    snake_head.x--;
-  } else if (current_dir == Up) {
-    snake_head.y--;
-  } else if (current_dir == Down) {
-    snake_head.y++;
-  }
+  if (snake.y >= NUM_GRIDS_Y)
+    snake.y = 0;
+  else if (snake.y < 0)
+    snake.y = NUM_GRIDS_Y;
 
-  if (snake_head.x == food_pos.x && snake_head.y == food_pos.y) {
-    // TODO: grow the snake, update the point
-    food_pos = GetRandomVector();
+  if (snake.x == foodPos.x && snake.y == foodPos.y) {
+    score++;
+    foodPos = GetRandomVector();
+    foodDestRec = (Rectangle){.x = foodPos.x * GRID_W,
+                              .y = foodPos.y * GRID_H,
+                              .width = GRID_W,
+                              .height = GRID_H};
+    printf("dest:= x: %f, y: %f, w: %f, h: %f\n", foodDestRec.x, foodDestRec.y,
+           foodDestRec.width, foodDestRec.height);
   }
 
   // Draw;
@@ -100,12 +121,12 @@ void UpdateDrawFrame() {
       }
     }
 
-    DrawRectangle(snake_head.x * GRID_W, snake_head.y * GRID_H, GRID_W, GRID_H,
-                  RED);
-    DrawCircle((food_pos.x * GRID_W) + (GRID_W / 2.0f),
-               (food_pos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
+    DrawRectangle(snake.x * GRID_W, snake.y * GRID_H, GRID_W, GRID_H, RED);
+    DrawTexturePro(scarfy, foodSourceRec, foodDestRec, origin, 0.0, VIOLET);
+    // DrawCircle((foodPos.x * GRID_W) + (GRID_W / 2.0f),
+    //            (foodPos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
   } // EndDrawing
 
   EndDrawing();
-  usleep(SLEEP_DURATION);
+  // usleep(SLEEP_DURATION);
 }
