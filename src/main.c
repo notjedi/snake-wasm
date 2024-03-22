@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -26,31 +25,12 @@ static Direction dir = Right;
 static Snake snake = (Snake){.x = 0, .y = 0, .width = GRID_W, .height = GRID_H};
 static Vector2 foodPos = {NUM_GRIDS_X / 2, NUM_GRIDS_Y / 2};
 
-static Rectangle foodSourceRec;
-static Rectangle foodDestRec;
-static Vector2 origin;
-static Texture2D scarfy;
-
 Vector2 GetRandomVector();
 void UpdateDrawFrame();
 
 int main() {
 
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake babu");
-  scarfy = LoadTexture("resources/scarfy.png");
-
-  int foodWidth = scarfy.width / 6;
-  int foodHeight = scarfy.height;
-  origin = (Vector2){(float)foodWidth, (float)foodHeight};
-  foodSourceRec = (Rectangle){0.0f, 0.0f, (float)foodWidth, (float)foodHeight};
-  foodDestRec =
-      (Rectangle){foodPos.x * GRID_W, foodPos.y * GRID_H, GRID_W, GRID_H};
-
-  printf("scarfy:= w: %d, h: %d, id: %u\n", scarfy.width, scarfy.height,
-         scarfy.id);
-  printf("foodWidth: %d, foodHeight: %d\n", foodWidth, foodHeight);
-  printf("source:= x: %f, y: %f, w: %f, h: %f\n", foodSourceRec.x,
-         foodSourceRec.y, foodSourceRec.width, foodSourceRec.height);
 
 #ifdef PLATFORM_WEB
   // TODO: try passing args to UpdateDrawFrame using
@@ -99,12 +79,6 @@ void UpdateDrawFrame() {
   if (snake.x == foodPos.x && snake.y == foodPos.y) {
     score++;
     foodPos = GetRandomVector();
-    foodDestRec = (Rectangle){.x = foodPos.x * GRID_W,
-                              .y = foodPos.y * GRID_H,
-                              .width = GRID_W,
-                              .height = GRID_H};
-    printf("dest:= x: %f, y: %f, w: %f, h: %f\n", foodDestRec.x, foodDestRec.y,
-           foodDestRec.width, foodDestRec.height);
   }
 
   // Draw;
@@ -122,9 +96,8 @@ void UpdateDrawFrame() {
     }
 
     DrawRectangle(snake.x * GRID_W, snake.y * GRID_H, GRID_W, GRID_H, RED);
-    DrawTexturePro(scarfy, foodSourceRec, foodDestRec, origin, 0.0, VIOLET);
-    // DrawCircle((foodPos.x * GRID_W) + (GRID_W / 2.0f),
-    //            (foodPos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
+    DrawCircle((foodPos.x * GRID_W) + (GRID_W / 2.0f),
+               (foodPos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
   } // EndDrawing
 
   EndDrawing();
