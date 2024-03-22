@@ -11,7 +11,9 @@
 
 #define GRID_W 20.0f
 #define GRID_H 20.0f
+#define FONT_SIZE 36
 #define SLEEP_DURATION 62500
+#define GAME_OVER "GAME OVER"
 
 const int SCREEN_WIDTH = 400;
 const int SCREEN_HEIGHT = 400;
@@ -22,13 +24,18 @@ const int NUM_GRIDS_Y = SCREEN_HEIGHT / GRID_H;
 
 void update_draw_frame(void *arg);
 
+Vector2 center_text(Vector2 screen_size, Vector2 text_size) {
+  return (Vector2){(screen_size.x / 2) - (text_size.x / 2),
+                   (screen_size.y / 2) - (text_size.y / 2)};
+}
+
 int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake babu");
   Game game = init_game(GRID_W, GRID_H, NUM_GRIDS_X, NUM_GRIDS_Y);
 
 #ifdef PLATFORM_WEB
   // TODO: try passing args to UpdateDrawFrame using
-  emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, 10, 1);
+  emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, 20, 1);
 #else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
 
@@ -62,8 +69,20 @@ void update_draw_frame(void *arg) {
     last_block = game->snake.head;
   }
 
-  if (game->game_over)
-    emscripten_cancel_main_loop();
+  if (game->game_over) {
+    {
+      BeginDrawing();
+      Font default_font = GetFontDefault();
+      Vector2 text_size =
+          MeasureTextEx(default_font, GAME_OVER, FONT_SIZE, 1.0f);
+      Vector2 text_pos =
+          center_text((Vector2){SCREEN_WIDTH, SCREEN_HEIGHT}, text_size);
+      DrawTextEx(default_font, GAME_OVER, text_pos, FONT_SIZE, 1.0f, VIOLET);
+      EndDrawing();
+      emscripten_cancel_main_loop();
+      return;
+    }
+  }
   game->game_over = snake_update(&game->snake, game->dir);
 
   if (game->snake.head.x >= NUM_GRIDS_X)
