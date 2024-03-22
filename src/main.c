@@ -1,5 +1,5 @@
+#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "raylib/raylib.h"
 
@@ -22,8 +22,11 @@ const int NUM_GRIDS_Y = SCREEN_HEIGHT / GRID_H;
 
 static int score = 0;
 static Direction dir = Right;
-static Snake snake = (Snake){.x = 0, .y = 0, .width = GRID_W, .height = GRID_H};
 static Vector2 foodPos = {NUM_GRIDS_X / 2, NUM_GRIDS_Y / 2};
+static Snake snake = (Snake){.head = (Block){0, 0},
+                             .body = INIT_BODY,
+                             .width = GRID_W,
+                             .height = GRID_H};
 
 Vector2 GetRandomVector();
 void UpdateDrawFrame();
@@ -35,7 +38,7 @@ int main() {
 #ifdef PLATFORM_WEB
   // TODO: try passing args to UpdateDrawFrame using
   // emscripten_set_main_loop_arg
-  emscripten_set_main_loop(UpdateDrawFrame, 20, 1);
+  emscripten_set_main_loop(UpdateDrawFrame, 10, 1);
 #else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
 
@@ -53,6 +56,7 @@ Vector2 GetRandomVector() {
 }
 
 void UpdateDrawFrame() {
+
   // Update;
   if (IsKeyDown(KEY_RIGHT)) {
     dir = Right;
@@ -64,21 +68,33 @@ void UpdateDrawFrame() {
     dir = Down;
   }
 
+  Block last_block;
+  if (snake.body.len > 0) {
+    last_block = snake.body.blocks[snake.body.rear - 1];
+  } else {
+    last_block = snake.head;
+  }
+
   updateSnake(&snake, dir);
+  if (snake.head.x >= NUM_GRIDS_X)
+    snake.head.x = 0;
+  else if (snake.head.x < 0)
+    snake.head.x = NUM_GRIDS_X;
 
-  if (snake.x >= NUM_GRIDS_X)
-    snake.x = 0;
-  else if (snake.x < 0)
-    snake.x = NUM_GRIDS_X;
+  if (snake.head.y >= NUM_GRIDS_Y)
+    snake.head.y = 0;
+  else if (snake.head.y < 0)
+    snake.head.y = NUM_GRIDS_Y;
 
-  if (snake.y >= NUM_GRIDS_Y)
-    snake.y = 0;
-  else if (snake.y < 0)
-    snake.y = NUM_GRIDS_Y;
-
-  if (snake.x == foodPos.x && snake.y == foodPos.y) {
+  if (snake.head.x == foodPos.x && snake.head.y == foodPos.y) {
     score++;
     foodPos = GetRandomVector();
+    push(&snake.body, last_block);
+
+    // printf("last_block: x: %d, y: %d\n", last_block.x, last_block.y);
+    // printf("head: x: %d, y: %d\n", snake.head.x, snake.head.y);
+    // printf("len: %d\n", snake.body.len);
+    printBodyBlocks(&snake.body);
   }
 
   // Draw;
@@ -95,11 +111,14 @@ void UpdateDrawFrame() {
       }
     }
 
-    DrawRectangle(snake.x * GRID_W, snake.y * GRID_H, GRID_W, GRID_H, RED);
-    DrawCircle((foodPos.x * GRID_W) + (GRID_W / 2.0f),
-               (foodPos.y * GRID_H) + (GRID_H / 2.0f), GRID_W / 2.0, YELLOW);
+    // Draw snake head
+    DrawSnake(&snake);
+
+    // Draw food
+    DrawCircle((foodPos.x * GRID_W) + (GRID_W / 2),
+               (foodPos.y * GRID_H) + (GRID_H / 2), (GRID_W / 2.0) - 1.0f,
+               YELLOW);
   } // EndDrawing
 
   EndDrawing();
-  // usleep(SLEEP_DURATION);
 }
