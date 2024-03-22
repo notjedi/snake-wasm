@@ -1,6 +1,7 @@
-#include "snake.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "snake.h"
 
 Block pop(Body *body) {
   if (body->len) {
@@ -26,10 +27,6 @@ void push(Body *body, Block block) {
     }
 
     // copy over to new memory
-    int count = 0;
-    for (int i = body->front; i < body->rear; i = (i + 1) % body->capacity) {
-      new_blocks[count++] = body->blocks[i];
-    }
     int current = body->front;
     for (int i = 0; i < body->len; i++) {
       Block block = body->blocks[current];
@@ -38,89 +35,38 @@ void push(Body *body, Block block) {
     }
 
     // free old array
-    Block *old_blocks = body->blocks;
+    free(body->blocks);
     body->front = 0;
     body->rear = body->len;
     body->blocks = new_blocks;
     body->capacity = new_capacity;
-    free(old_blocks);
   }
   body->blocks[body->rear] = block;
   body->rear = (body->rear + 1) % body->capacity;
   body->len++;
 };
 
-void printBodyBlocks(Body *body) {
-  int current = body->front;
-  for (int i = 0; i < body->len; i++) {
-    current = (current + 1) % body->capacity;
-    Block block = body->blocks[i];
-    printf("block[%d]: x: %d, y: %d\n", i, block.x, block.y);
-  }
-}
-
-Block getNextBlock(Block last_block, Direction dir) {
-  Direction new_dir;
-  switch (dir) {
-  case Up:
-    new_dir = Down;
-    break;
-  case Right:
-    new_dir = Left;
-    break;
-  case Down:
-    new_dir = Up;
-    break;
-  case Left:
-    new_dir = Right;
-    break;
-  }
-
-  if (new_dir == Right) {
-    last_block.x++;
-  } else if (new_dir == Left) {
-    last_block.x--;
-  } else if (new_dir == Up) {
-    last_block.y--;
-  } else if (new_dir == Down) {
-    last_block.y++;
-  }
-  return last_block;
-}
-
-void printBody(Body *body) {
-  printf("len: %d, capacity: %d\n", body->len, body->capacity);
-  printf("front: %d, rear: %d\n", body->front, body->rear);
-  printBodyBlocks(body);
-}
-
 void updateSnake(Snake *snake, Direction dir) {
   Block prev_head = snake->head;
-  if (snake->body.len > 0) {
-    printf("------ start update --------\n");
-    printf("before: x: %d, y: %d\n", snake->head.x, snake->head.y);
-    printf("prev_head: x: %d, y: %d\n", prev_head.x, prev_head.y);
-  }
-  if (dir == Right) {
-    snake->head.x++;
-  } else if (dir == Left) {
-    snake->head.x--;
-  } else if (dir == Up) {
+  switch (dir) {
+  case Up:
     snake->head.y--;
-  } else if (dir == Down) {
+    break;
+  case Right:
+    snake->head.x++;
+    break;
+  case Down:
     snake->head.y++;
-  }
-  if (snake->body.len > 0) {
-    printf("after: x: %d, y: %d\n", snake->head.x, snake->head.y);
+    break;
+  case Left:
+    snake->head.x--;
+    break;
   }
 
-  // TODO: only call if len(blocks) > 0
   // len of circular queue?  = rear + ((len - front) % SIZE) + 1
   if (snake->body.len > 0) {
     pop(&snake->body);
     push(&snake->body, prev_head);
-    printBody(&snake->body);
-    printf("------ end update --------\n");
   }
 };
 

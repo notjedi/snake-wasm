@@ -56,7 +56,6 @@ Vector2 GetRandomVector() {
 }
 
 void UpdateDrawFrame() {
-
   // Update;
   if (IsKeyDown(KEY_RIGHT)) {
     dir = Right;
@@ -90,11 +89,6 @@ void UpdateDrawFrame() {
     score++;
     foodPos = GetRandomVector();
     push(&snake.body, last_block);
-
-    // printf("last_block: x: %d, y: %d\n", last_block.x, last_block.y);
-    // printf("head: x: %d, y: %d\n", snake.head.x, snake.head.y);
-    // printf("len: %d\n", snake.body.len);
-    printBodyBlocks(&snake.body);
   }
 
   // Draw;
@@ -111,7 +105,7 @@ void UpdateDrawFrame() {
       }
     }
 
-    // Draw snake head
+    // Draw snake
     DrawSnake(&snake);
 
     // Draw food

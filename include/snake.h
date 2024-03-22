@@ -7,7 +7,7 @@
 #include "raylib/raylib.h"
 
 #define INIT_BODY                                                              \
-  (Body) { .len = 0, .front = 0, .rear = 0, .capacity = 0, .blocks = NULL }
+  (Body) { .len = 0, .capacity = 0, .front = 0, .rear = 0, .blocks = NULL }
 
 typedef struct Block {
   int x;
@@ -17,9 +17,9 @@ typedef struct Block {
 typedef struct Body {
   // TODO: no need for len, when capacity is hit -> rear == front
   int len;
-  int rear;
-  int front;
   int capacity;
+  int front;
+  int rear;
   Block *blocks;
 } Body;
 
