@@ -57,13 +57,13 @@ Vector2 GetRandomVector() {
 
 void UpdateDrawFrame() {
   // Update;
-  if (IsKeyDown(KEY_RIGHT)) {
+  if (IsKeyDown(KEY_RIGHT) && dir != Left) {
     dir = Right;
-  } else if (IsKeyDown(KEY_LEFT)) {
+  } else if (IsKeyDown(KEY_LEFT) && dir != Right) {
     dir = Left;
-  } else if (IsKeyDown(KEY_UP)) {
+  } else if (IsKeyDown(KEY_UP) && dir != Down) {
     dir = Up;
-  } else if (IsKeyDown(KEY_DOWN)) {
+  } else if (IsKeyDown(KEY_DOWN) && dir != Up) {
     dir = Down;
   }
 
