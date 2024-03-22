@@ -1,15 +1,15 @@
 #include "snake.h"
 
-Block body_pop(Body *body) {
+Block *body_pop(Body *body) {
   if (body->len) {
     body->len--;
-    Block first = body->blocks[body->front];
+    Block *first = &body->blocks[body->front];
     body->front = (body->front + 1) % body->capacity;
     return first;
   } else {
     fprintf(stderr, "no elements to deque\n");
     // TODO: i'm missing the None type from rust
-    // return NULL;
+    return NULL;
     // exit(1);
   }
 }

@@ -4,11 +4,13 @@ project(snake-wasm C)
 set(SOURCES
     src/main.c
     src/snake.c
+    src/game.c
 )
 
 include_directories(include)
 set(HEADERS
     include/snake.h
+    include/game.h
 )
 
 set(CMAKE_VERBOSE_MAKEFILE on)

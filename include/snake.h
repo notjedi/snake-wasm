@@ -9,13 +9,20 @@
 #define INIT_BODY                                                              \
   (Body) { .len = 0, .capacity = 0, .front = 0, .rear = 0, .blocks = NULL }
 
+#define INIT_SNAKE(grid_w, grid_h, max_w, max_h)                               \
+  ((Snake){.head = (Block){0, 0},                                              \
+           .body = INIT_BODY,                                                  \
+           .width = grid_w,                                                    \
+           .height = grid_h,                                                   \
+           .max_x = max_w,                                                     \
+           .max_y = max_h})
+
 typedef struct Block {
   int x;
   int y;
 } Block;
 
 typedef struct Body {
-  // TODO: no need for len, when capacity is hit -> rear == front
   int len;
   int capacity;
   int front;
@@ -34,7 +41,7 @@ typedef struct Snake {
 
 typedef enum { Up, Right, Down, Left } Direction;
 
-Block body_pop(Body *body);
+Block *body_pop(Body *body);
 void body_push(Body *body, Block block);
 
 bool snake_update(Snake *snake, Direction dir);
