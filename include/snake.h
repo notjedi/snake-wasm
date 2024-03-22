@@ -28,18 +28,16 @@ typedef struct Snake {
   Body body;
   int width;
   int height;
+  int max_x;
+  int max_y;
 } Snake;
 
 typedef enum { Up, Right, Down, Left } Direction;
 
-Block getNextBlock(Block last_block, Direction dir);
+Block body_pop(Body *body);
+void body_push(Body *body, Block block);
 
-Block pop(Body *body);
-void push(Body *body, Block block);
-
-void updateSnake(Snake *snake, Direction dir);
-void DrawSnake(Snake *snake);
-
-void printBodyBlocks(Body *body);
+bool snake_update(Snake *snake, Direction dir);
+void snake_draw(Snake *snake);
 
 #endif // SNAKE_H

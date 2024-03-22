@@ -1,9 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "snake.h"
 
-Block pop(Body *body) {
+Block body_pop(Body *body) {
   if (body->len) {
     body->len--;
     Block first = body->blocks[body->front];
@@ -17,7 +14,7 @@ Block pop(Body *body) {
   }
 }
 
-void push(Body *body, Block block) {
+void body_push(Body *body, Block block) {
   if (body->len >= body->capacity) {
     int new_capacity = body->capacity ? body->capacity * 2 : 8;
     Block *new_blocks = malloc(new_capacity * sizeof(Block));
@@ -41,12 +38,13 @@ void push(Body *body, Block block) {
     body->blocks = new_blocks;
     body->capacity = new_capacity;
   }
+
   body->blocks[body->rear] = block;
   body->rear = (body->rear + 1) % body->capacity;
   body->len++;
 };
 
-void updateSnake(Snake *snake, Direction dir) {
+bool snake_update(Snake *snake, Direction dir) {
   Block prev_head = snake->head;
   switch (dir) {
   case Up:
@@ -63,14 +61,23 @@ void updateSnake(Snake *snake, Direction dir) {
     break;
   }
 
+  int current = snake->body.front;
+  for (int i = 0; i < snake->body.len; i++) {
+    Block block = snake->body.blocks[current];
+    if (block.x == snake->head.x && block.y == snake->head.y) {
+      return true;
+    }
+  }
+
   // len of circular queue?  = rear + ((len - front) % SIZE) + 1
   if (snake->body.len > 0) {
-    pop(&snake->body);
-    push(&snake->body, prev_head);
+    body_pop(&snake->body);
+    body_push(&snake->body, prev_head);
   }
+  return false;
 };
 
-void DrawSnake(Snake *snake) {
+void snake_draw(Snake *snake) {
   DrawRectangle(snake->head.x * snake->width, snake->head.y * snake->height,
                 snake->width, snake->height, RED);
 
