@@ -18,28 +18,28 @@
            .max_y = max_h})
 
 typedef struct Block {
-  int x;
-  int y;
-} Block;
+  int x; // 4 bytes
+  int y; // 4 bytes
+} Block; // 8 bytes
 
 typedef struct Body {
-  int len;
-  int capacity;
-  int front;
-  int rear;
-  Block *blocks;
-} Body;
+  Block *blocks; // 8 bytes
+  int capacity;  // 4 bytes
+  int front;     // 4 bytes
+  int rear;      // 4 bytes
+  int len;       // 4 bytes
+} Body;          // 24 bytes
 
 typedef struct Snake {
-  Block head;
-  Body body;
-  int width;
-  int height;
-  int max_x;
-  int max_y;
-} Snake;
+  Body body;  // 24 bytes
+  Block head; // 8 bytes
+  int width;  // 4 bytes
+  int height; // 4 bytes
+  int max_x;  // 4 bytes
+  int max_y;  // 4 bytes
+} Snake;      // 48 bytes
 
-typedef enum { Up, Right, Down, Left } Direction;
+typedef enum { Up, Right, Down, Left } Direction; // 4 bytes
 
 Block *body_pop(Body *body);
 void body_push(Body *body, Block block);

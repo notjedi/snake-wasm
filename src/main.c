@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "raylib/raylib.h"
 
 #ifdef PLATFORM_WEB
@@ -12,11 +10,11 @@
 #define GRID_W 20.0f
 #define GRID_H 20.0f
 #define FONT_SIZE 36
+#define SCREEN_WIDTH 400
+#define SCREEN_HEIGHT 400
 #define SLEEP_DURATION 62500
 #define GAME_OVER "GAME OVER"
 
-const int SCREEN_WIDTH = 400;
-const int SCREEN_HEIGHT = 400;
 const int NUM_GRIDS_X = SCREEN_WIDTH / GRID_W;
 const int NUM_GRIDS_Y = SCREEN_HEIGHT / GRID_H;
 
@@ -78,21 +76,16 @@ void update_draw_frame(void *arg) {
           center_text((Vector2){SCREEN_WIDTH, SCREEN_HEIGHT}, text_size);
       DrawTextEx(default_font, GAME_OVER, text_pos, FONT_SIZE, 1.0f, VIOLET);
       EndDrawing();
+      // https://github.com/emscripten-core/emscripten/issues/2766
       emscripten_cancel_main_loop();
       return;
     }
   }
   game->game_over = snake_update(&game->snake, game->dir);
 
-  if (game->snake.head.x >= NUM_GRIDS_X)
-    game->snake.head.x = 0;
-  else if (game->snake.head.x < 0)
-    game->snake.head.x = NUM_GRIDS_X;
-
-  if (game->snake.head.y >= NUM_GRIDS_Y)
-    game->snake.head.y = 0;
-  else if (game->snake.head.y < 0)
-    game->snake.head.y = NUM_GRIDS_Y;
+  // Adjust snake head position to wrap around the screen
+  game->snake.head.x = (game->snake.head.x + NUM_GRIDS_X) % NUM_GRIDS_X;
+  game->snake.head.y = (game->snake.head.y + NUM_GRIDS_Y) % NUM_GRIDS_Y;
 
   if (game->snake.head.x == game->food_pos.x &&
       game->snake.head.y == game->food_pos.y) {
