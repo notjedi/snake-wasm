@@ -1,4 +1,5 @@
 #include "snake.h"
+#include <string.h>
 
 Block *body_pop(Body *body) {
   if (body->len) {
@@ -8,15 +9,13 @@ Block *body_pop(Body *body) {
     return first;
   } else {
     fprintf(stderr, "no elements to deque\n");
-    // TODO: i'm missing the None type from rust
     return NULL;
-    // exit(1);
   }
 }
 
 void body_push(Body *body, Block block) {
   if (body->len >= body->capacity) {
-    int new_capacity = body->capacity ? body->capacity * 2 : 8;
+    int new_capacity = body->capacity ? body->capacity * 2 : 2;
     Block *new_blocks = malloc(new_capacity * sizeof(Block));
     if (new_blocks == NULL) {
       fprintf(stderr, "failed to allocate memory\n");
@@ -24,11 +23,20 @@ void body_push(Body *body, Block block) {
     }
 
     // copy over to new memory
-    int current = body->front;
-    for (int i = 0; i < body->len; i++) {
-      Block block = body->blocks[current];
-      new_blocks[i] = block;
-      current = (current + 1) % body->capacity;
+    if (body->len > 0) {
+      int start = body->front;
+      int end = (body->front + body->len - 1) % body->capacity;
+      if (end >= start) {
+        int num_elements = end - start + 1;
+        memcpy(new_blocks, &body->blocks[start], num_elements * sizeof(Block));
+      } else {
+        int num_elements_before_wrap = body->capacity - start;
+        int num_elements_after_wrap = end + 1;
+        memcpy(new_blocks, &body->blocks[start],
+               num_elements_before_wrap * sizeof(Block));
+        memcpy(new_blocks + num_elements_before_wrap, body->blocks,
+               num_elements_after_wrap * sizeof(Block));
+      }
     }
 
     // free old array

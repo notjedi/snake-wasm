@@ -34,7 +34,6 @@ int main() {
   Game game = init_game(GRID_W, GRID_H, NUM_GRIDS_X, NUM_GRIDS_Y);
 
 #ifdef PLATFORM_WEB
-  // TODO: try passing args to UpdateDrawFrame using
   emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, 20, 1);
 #else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
