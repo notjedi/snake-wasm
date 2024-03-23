@@ -52,6 +52,18 @@ void body_push(Body *body, Block block) {
   body->len++;
 };
 
+bool is_point_in_snake_body(Snake *snake, int x, int y) {
+  int current = snake->body.front;
+  for (int i = 0; i < snake->body.len; i++) {
+    Block block = snake->body.blocks[current];
+    current = (current + 1) % snake->body.capacity;
+    if (block.x == x && block.y == y) {
+      return true;
+    }
+  }
+  return false;
+}
+
 bool snake_update(Snake *snake, Direction dir) {
   Block prev_head = snake->head;
   switch (dir) {
@@ -69,20 +81,12 @@ bool snake_update(Snake *snake, Direction dir) {
     break;
   }
 
-  int current = snake->body.front;
-  for (int i = 0; i < snake->body.len; i++) {
-    Block block = snake->body.blocks[current];
-    if (block.x == snake->head.x && block.y == snake->head.y) {
-      return true;
-    }
-  }
-
-  // len of circular queue?  = rear + ((len - front) % SIZE) + 1
   if (snake->body.len > 0) {
     body_pop(&snake->body);
     body_push(&snake->body, prev_head);
   }
-  return false;
+
+  return is_point_in_snake_body(snake, snake->head.x, snake->head.y);
 };
 
 void snake_draw(Snake *snake) {

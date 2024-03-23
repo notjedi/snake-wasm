@@ -44,6 +44,7 @@ typedef enum { Up, Right, Down, Left } Direction;
 Block *body_pop(Body *body);
 void body_push(Body *body, Block block);
 
+bool is_point_in_snake_body(Snake *snake, int x, int y);
 bool snake_update(Snake *snake, Direction dir);
 void snake_draw(Snake *snake);
 

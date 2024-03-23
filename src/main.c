@@ -97,8 +97,11 @@ void update_draw_frame(void *arg) {
   if (game->snake.head.x == game->food_pos.x &&
       game->snake.head.y == game->food_pos.y) {
     game->score++;
-    game->food_pos = get_random_vector(NUM_GRIDS_X, NUM_GRIDS_Y);
     body_push(&game->snake.body, last_block);
+    Vector2 food_pos = get_random_vector(NUM_GRIDS_X, NUM_GRIDS_Y);
+    while (is_point_in_snake_body(&game->snake, food_pos.x, food_pos.y))
+      food_pos = get_random_vector(NUM_GRIDS_X, NUM_GRIDS_Y);
+    game->food_pos = food_pos;
   }
 
   // Draw;
