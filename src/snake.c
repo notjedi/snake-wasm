@@ -1,4 +1,5 @@
 #include "snake.h"
+#include <stdio.h>
 #include <string.h>
 
 Block *body_pop(Body *body) {
@@ -81,12 +82,18 @@ bool snake_update(Snake *snake, Direction dir) {
     break;
   }
 
+  if (is_point_in_snake_body(snake, snake->head.x, snake->head.y)) {
+    body_pop(&snake->body);
+    body_push(&snake->body, prev_head);
+    return true;
+  }
+
   if (snake->body.len > 0) {
     body_pop(&snake->body);
     body_push(&snake->body, prev_head);
   }
 
-  return is_point_in_snake_body(snake, snake->head.x, snake->head.y);
+  return false;
 };
 
 void snake_draw(Snake *snake) {
