@@ -15,13 +15,15 @@ set(HEADERS
 
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2 -g")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -O2 -g -fsanitize=address") # using -fsanitize=address breaks code related to body.blocks and malloc?
 
 if (PLATFORM_WEB)
     # https://github.com/raysan5/raylib/wiki/Working-for-Web-(HTML5)
     add_compile_definitions(PLATFORM_WEB)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 --preload-file resources -s GL_ENABLE_GET_PROC_ADDRESS=1")
+    # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s GL_ENABLE_GET_PROC_ADDRESS=1")
     # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s GL_ENABLE_GET_PROC_ADDRESS=1 --shell-file ${CMAKE_SOURCE_DIR}/include/wasm/raylib/minshell.html")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
 

@@ -11,10 +11,11 @@ typedef struct Game {
   Vector2 food_pos; // 8 bytes
   Direction dir;    // 4 bytes
   int score;        // 4 bytes
+  int fps;          // 4 bytes
   bool game_over;   // 1 byte (8 bytes with padding)
-} Game;             // 72 bytes
+} Game;             // 76 bytes
 
 Vector2 get_random_vector(int max_x, int max_y);
-Game init_game(int grid_w, int grid_h, int max_w, int max_h);
+Game init_game(int grid_w, int grid_h, int max_w, int max_h, int fps);
 
 #endif // GAME_H

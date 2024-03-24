@@ -1,5 +1,4 @@
 #include "raylib/raylib.h"
-#include <stdio.h>
 
 #ifdef PLATFORM_WEB
 #include "emscripten/emscripten.h"
@@ -11,8 +10,10 @@
 #define GRID_W 20.0f
 #define GRID_H 20.0f
 #define FONT_SIZE 36
+#define START_FPS 20
 #define SCREEN_WIDTH 400
 #define SCREEN_HEIGHT 400
+#define FPS_INCR_INTERVAL 1
 #define SLEEP_DURATION 62500
 #define GAME_OVER "GAME OVER"
 
@@ -30,10 +31,10 @@ Vector2 center_text(Vector2 screen_size, Vector2 text_size) {
 
 int main() {
   InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Snake babu");
-  Game game = init_game(GRID_W, GRID_H, NUM_GRIDS_X, NUM_GRIDS_Y);
+  Game game = init_game(GRID_W, GRID_H, NUM_GRIDS_X, NUM_GRIDS_Y, START_FPS);
 
 #ifdef PLATFORM_WEB
-  emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, 20, 1);
+  emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, START_FPS, 1);
 #else /* ifdef PLATFORM_WEB */
   SetTargetFPS(60);
 
@@ -82,6 +83,13 @@ void update_draw_frame(void *arg) {
       while (is_point_in_snake_body(&game->snake, food_pos.x, food_pos.y))
         food_pos = get_random_vector(NUM_GRIDS_X, NUM_GRIDS_Y);
       game->food_pos = food_pos;
+
+      if (game->score % FPS_INCR_INTERVAL == 0) {
+        game->fps++;
+        emscripten_cancel_main_loop();
+        emscripten_set_main_loop_arg(update_draw_frame, (void *)&game,
+                                     game->fps, 1);
+      }
     }
   }
 
