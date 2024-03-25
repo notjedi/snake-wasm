@@ -1,4 +1,5 @@
 #include "raylib/raylib.h"
+#include <stdio.h>
 
 #ifdef PLATFORM_WEB
 #include "emscripten/emscripten.h"
@@ -36,10 +37,10 @@ int main() {
 #ifdef PLATFORM_WEB
   emscripten_set_main_loop_arg(update_draw_frame, (void *)&game, START_FPS, 1);
 #else /* ifdef PLATFORM_WEB */
-  SetTargetFPS(60);
+  SetTargetFPS(START_FPS);
 
   while (!WindowShouldClose()) {
-    UpdateDrawFrame();
+    update_draw_frame((void *)&game);
   }
 #endif
 
@@ -64,7 +65,9 @@ void update_draw_frame(void *arg) {
 
     Block last_block;
     if (game->snake.body.len > 0) {
-      last_block = game->snake.body.blocks[game->snake.body.rear - 1];
+      int rear = game->snake.body.rear - 1;
+      int last_idx = rear < 0 ? game->snake.body.len - 1 : rear;
+      last_block = game->snake.body.blocks[last_idx];
     } else {
       last_block = game->snake.head;
     }
@@ -86,9 +89,11 @@ void update_draw_frame(void *arg) {
 
       if (game->score % FPS_INCR_INTERVAL == 0) {
         game->fps++;
+#ifdef PLATFORM_WEB
         emscripten_cancel_main_loop();
         emscripten_set_main_loop_arg(update_draw_frame, (void *)&game,
                                      game->fps, 1);
+#endif /* ifdef PLATFORM_WEB */
       }
     }
   }
