@@ -1,5 +1,5 @@
 #include "raylib/raylib.h"
-#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef PLATFORM_WEB
 #include "emscripten/emscripten.h"
@@ -11,10 +11,10 @@
 #define GRID_W 20.0f
 #define GRID_H 20.0f
 #define FONT_SIZE 36
-#define START_FPS 20
+#define START_FPS 10
 #define SCREEN_WIDTH 400
 #define SCREEN_HEIGHT 400
-#define FPS_INCR_INTERVAL 1
+#define FPS_INCR_INTERVAL 5
 #define SLEEP_DURATION 62500
 #define GAME_OVER "GAME OVER"
 
@@ -45,6 +45,7 @@ int main() {
 #endif
 
   CloseWindow();
+  free(game.snake.body.blocks);
   return 0;
 }
 
@@ -88,12 +89,13 @@ void update_draw_frame(void *arg) {
       game->food_pos = food_pos;
 
       if (game->score % FPS_INCR_INTERVAL == 0) {
-        game->fps++;
+        game->fps = game->fps + 1 > 60 ? 60 : game->fps + 1;
 #ifdef PLATFORM_WEB
-        emscripten_cancel_main_loop();
-        emscripten_set_main_loop_arg(update_draw_frame, (void *)&game,
-                                     game->fps, 1);
-#endif /* ifdef PLATFORM_WEB */
+        // emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 1000 / fps);
+        emscripten_set_main_loop_timing(EM_TIMING_RAF, 60 / game->fps);
+#else /* ifdef PLATFORM_WEB */
+        SetTargetFPS(game->fps);
+#endif
       }
     }
   }
